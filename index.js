@@ -1,16 +1,20 @@
-// function openForm() {
-//     document.getElementById("myForm").style.display = "block";
-// }
+const express = require("express");
+const app = express();
+const cors = require("cors");
 
-// function closeForm() {
-//     document.getElementById("myForm").style.display = "none";
-// }
+app.use(express.json());
+app.use(cors());
 
-document.querySelector("#show-login").addEventListener("click", function () {
-    document.querySelector(".popup").classList.add("active");
+let checklistArr = ["tent", "chair"];
+let finalArr = [];
+
+app.get("/api/winter/", (req, res) => {
+    res.status(200).send(checklistArr);
 });
-document
-    .querySelector(".popup .close-btn")
-    .addEventListener("click", function () {
-        document.querySelector(".popup").classList.remove("active");
-    });
+app.post("/api/winter/", (req, res) => {
+    let incomingItem = req.body;
+    finalArr.push(incomingItem);
+    res.status(200).send(finalArr);
+});
+
+app.listen(4080, () => console.log("server is running on 4080"));

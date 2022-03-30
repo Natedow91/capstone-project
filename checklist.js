@@ -24,7 +24,7 @@ list.addEventListener(
         if (ev.target.tagName === "LI") {
             ev.target.classList.toggle("checked");
         }
-        winterClick(ev.target.textContent);
+        click(ev.target.textContent);
         console.log(ev.target.textContent);
     },
     false
@@ -55,31 +55,38 @@ function newElement() {
         };
     }
 }
-let winterClick = (event) => {
-    let item = event;
-    console.log("winterClick" + item);
-    let checklistObj = {
-        item: item,
-    };
-    onClick1(checklistObj);
-};
-let onClick = function () {
-    axios.get("http://localhost:4080/api/winter/").then((res) => {
-        for (let i = 0; i < res.data.length; i++) {
-            res.data((item) => {
-                const p = document.createElement("p");
-                const t = document.createTextNode(res.data[i]);
-                p.appendChild(res.data[i]);
+// let myChecklistClick = (event) => {
+//     let item = event;
+//     console.log("myChecklistClick1" + item);
+//     let checklistObj = {
+//         item: item,
+//     };
+// };
+// let myChecklistClick1 = function () {
+//     axios.get("http://localhost:4080/api/winter/").then((res) => {
+//         for (let i = 0; i < res.data.length; i++) {
+//             finalArr = (item) => {
+//                 const p = document.createElement("p");
+//                 const t = document.createTextNode(res.data[i]);
+//                 p.appendChild(res.data[i]);
 
-                responseSection.appendChild(p);
-            });
-        }
-    });
-};
-let onClick1 = function (checklistObj) {
-    axios
-        .post("http://localhost:4080/api/winter/", checklistObj)
-        .then((res) => {
-            console.log(res.data);
+//                 responseSection.appendChild(p);
+//             };
+//         }
+//     });
+// };
+module.exports = {
+let click = function () {
+    axios.get("http://localhost:4080/api/winter/").then((res) => {
+        // for (let i = 0; i < res.data.length; i++) {
+        dataArr.forEach((item) => {
+            const p = document.createElement("p");
+            const t = document.createTextNode(res.data[i]);
+            p.appendChild(res.data[i]);
+
+            responseSection.appendChild(p);
         });
-};
+        // }
+    });
+}
+}
