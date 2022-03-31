@@ -1,85 +1,64 @@
-var myNodelist = document.getElementsByTagName("LI");
-var i;
-for (i = 0; i < myNodelist.length; i++) {
-    var span = document.createElement("SPAN");
-    var txt = document.createTextNode("\u00D7");
-    span.className = "close";
-    span.appendChild(txt);
-    myNodelist[i].appendChild(span);
-}
+const winterUL = document.querySelector("#winterUL");
+const winterInput = document.querySelector("#myInput");
+const myButton = document.querySelector(".addBtn");
+const getWinterList = () => {
+    axios
+        .get("http://localhost:4080/api/winter")
+        .then((res) => {
+            console.log(res.data);
+            let winterArr = res.data;
 
-var close = document.getElementsByClassName("close");
-var i;
-for (i = 0; i < close.length; i++) {
-    close[i].onclick = function () {
-        var div = this.parentElement;
-        div.style.display = "none";
-    };
-}
+            for (let i = 0; i < winterArr.length; i++) {
+                const newItem = document.createElement("li");
+                newItem.innerHTML = `
+                    <li class="item" id="${winterArr[i]}" onclick="addChecklist('${winterArr[i]}')">${winterArr[i]}</li>
+                `;
+                winterUL.appendChild(newItem);
+            }
+        })
+        .catch((err) => {
+            console.log(err);
+        });
+};
 
-var list = document.querySelector("ul");
-list.addEventListener(
-    "click",
-    function (ev) {
-        if (ev.target.tagName === "LI") {
-            ev.target.classList.toggle("checked");
-        }
-        winterClick(ev.target.textContent);
-        console.log(ev.target.textContent);
-    },
-    false
-);
+const addChecklist = (item) => {
+    const itemToRemove = document.querySelector(`#${item}`);
+    console.log(itemToRemove);
 
-function newElement() {
-    var li = document.createElement("li");
-    var inputValue = document.getElementById("myInput").value;
-    var t = document.createTextNode(inputValue);
-    li.appendChild(t);
-    if (inputValue === "") {
-        alert("You must write something!");
-    } else {
-        document.getElementById("myUL").appendChild(li);
-    }
-    document.getElementById("myInput").value = "";
-
-    var span = document.createElement("SPAN");
-    var txt = document.createTextNode("\u00D7");
-    span.className = "close";
-    span.appendChild(txt);
-    li.appendChild(span);
-
-    for (i = 0; i < close.length; i++) {
-        close[i].onclick = function () {
-            var div = this.parentElement;
-            div.style.display = "none";
-        };
-    }
-}
-let winterClick = (event) => {
-    let item = event;
-    console.log("winterClick" + item);
-    let checklistObj = {
+    const itemToAdd = {
         item: item,
     };
-    onClick1(checklistObj);
-};
-let onClick = function () {
-    axios.get("http://localhost:4080/api/winter/").then((res) => {
-        for (let i = 0; i < res.data.length; i++) {
-            res.data((item) => {
-                const p = document.createElement("p");
-                const t = document.createTextNode(res.data[i]);
-                p.appendChild(res.data[i]);
 
-                responseSection.appendChild(p);
-            });
+    axios
+        .post("http://localhost:4080/api/add", itemToAdd)
+        .then((res) => {
+            console.log(res.data);
+            itemToRemove.innerHTML = `
+                <s class="winter-item" id="${itemToRemove.textContent}" onclick="addChecklist('${itemToRemove.textContent}')">${itemToRemove.textContent}</s>
+            `;
+        })
+        .catch((err) => {
+            console.log(err);
+            alert(err.response.data);
+        });
+};
+
+const addItem = () => {
+    const item = winterInput.value;
+
+    const itemToAdd = {
+        item: item,
+    };
+    axios.post("http://localhost:4080/api/itemadded", itemToAdd).then((res) => {
+        let winterArr = res.data;
+        for (let i = 0; i < winterArr.length; i++) {
+            const newItem = document.createElement("li");
+            newItem.innerHTML = `
+                    <li class="item" id="${winterArr[i]}" onclick="addChecklist('${winterArr[i]}')">${winterArr[i]}</li>
+                `;
         }
     });
 };
-let onClick1 = function (checklistObj) {
-    axios
-        .post("http://localhost:4080/api/winter/", checklistObj)
-        .then((res) => {
-            console.log(res.data);
-        });
-};
+myButton.addEventListener("click", addItem);
+
+getWinterList();

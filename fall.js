@@ -1,55 +1,63 @@
-var myNodelist = document.getElementsByTagName("LI");
-var i;
-for (i = 0; i < myNodelist.length; i++) {
-    var span = document.createElement("SPAN");
-    var txt = document.createTextNode("\u00D7");
-    span.className = "close";
-    span.appendChild(txt);
-    myNodelist[i].appendChild(span);
-}
+const fallUL = document.querySelector("#fallUL");
+const fallInput = document.querySelector("#myInput");
+const myButton = document.querySelector(".addBtn");
+const getFallList = () => {
+    axios
+        .get("http://localhost:4080/api/fall")
+        .then((res) => {
+            console.log(res.data);
+            let fallArr = res.data;
 
-var close = document.getElementsByClassName("close");
-var i;
-for (i = 0; i < close.length; i++) {
-    close[i].onclick = function () {
-        var div = this.parentElement;
-        div.style.display = "none";
+            for (let i = 0; i < fallArr.length; i++) {
+                const newItem = document.createElement("li");
+                newItem.innerHTML = `
+                    <li class="item" id="${fallArr[i]}" onclick="addChecklist('${fallArr[i]}')">${fallArr[i]}</li>
+                `;
+                fallUL.appendChild(newItem);
+            }
+        })
+        .catch((err) => {
+            console.log(err);
+        });
+};
+
+const addChecklist = (item) => {
+    const itemToRemove = document.querySelector(`#${item}`);
+    console.log(itemToRemove);
+
+    const itemToAdd = {
+        item: item,
     };
-}
 
-var list = document.querySelector("ul");
-list.addEventListener(
-    "click",
-    function (ev) {
-        if (ev.target.tagName === "LI") {
-            ev.target.classList.toggle("checked");
+    axios
+        .post("http://localhost:4080/api/add", itemToAdd)
+        .then((res) => {
+            console.log(res.data);
+            itemToRemove.innerHTML = `
+                <s class="fall-item" id="${itemToRemove.textContent}" onclick="addChecklist('${itemToRemove.textContent}')">${itemToRemove.textContent}</s>
+            `;
+        })
+        .catch((err) => {
+            console.log(err);
+            alert(err.response.data);
+        });
+};
+const addItem = () => {
+    const item = fallInput.value;
+
+    const itemToAdd = {
+        item: item,
+    };
+    axios.post("http://localhost:4080/api/falladded", itemToAdd).then((res) => {
+        let fallArr = res.data;
+        for (let i = 0; i < fallArr.length; i++) {
+            const newItem = document.createElement("li");
+            newItem.innerHTML = `
+                    <li class="item" id="${fallArr[i]}" onclick="addChecklist('${fallArr[i]}')">${fallArr[i]}</li>
+                `;
         }
-    },
-    false
-);
+    });
+};
+myButton.addEventListener("click", addItem);
 
-function newElement() {
-    var li = document.createElement("li");
-    var inputValue = document.getElementById("myInput").value;
-    var t = document.createTextNode(inputValue);
-    li.appendChild(t);
-    if (inputValue === "") {
-        alert("You must write something!");
-    } else {
-        document.getElementById("myUL").appendChild(li);
-    }
-    document.getElementById("myInput").value = "";
-
-    var span = document.createElement("SPAN");
-    var txt = document.createTextNode("\u00D7");
-    span.className = "close";
-    span.appendChild(txt);
-    li.appendChild(span);
-
-    for (i = 0; i < close.length; i++) {
-        close[i].onclick = function () {
-            var div = this.parentElement;
-            div.style.display = "none";
-        };
-    }
-}
+getFallList();

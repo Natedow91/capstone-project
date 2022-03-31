@@ -1,55 +1,65 @@
-var myNodelist = document.getElementsByTagName("LI");
-var i;
-for (i = 0; i < myNodelist.length; i++) {
-    var span = document.createElement("SPAN");
-    var txt = document.createTextNode("\u00D7");
-    span.className = "close";
-    span.appendChild(txt);
-    myNodelist[i].appendChild(span);
-}
+const springUL = document.querySelector("#springUL");
+const springInput = document.querySelector("#myInput");
+const myButton = document.querySelector(".addBtn");
+const getSpringList = () => {
+    axios
+        .get("http://localhost:4080/api/spring")
+        .then((res) => {
+            console.log(res.data);
+            let springArr = res.data;
 
-var close = document.getElementsByClassName("close");
-var i;
-for (i = 0; i < close.length; i++) {
-    close[i].onclick = function () {
-        var div = this.parentElement;
-        div.style.display = "none";
+            for (let i = 0; i < springArr.length; i++) {
+                const newItem = document.createElement("li");
+                newItem.innerHTML = `
+                    <li class="item" id="${springArr[i]}" onclick="addChecklist('${springArr[i]}')">${springArr[i]}</li>
+                `;
+                springUL.appendChild(newItem);
+            }
+        })
+        .catch((err) => {
+            console.log(err);
+        });
+};
+
+const addChecklist = (item) => {
+    const itemToRemove = document.querySelector(`#${item}`);
+    console.log(itemToRemove);
+
+    const itemToAdd = {
+        item: item,
     };
-}
 
-var list = document.querySelector("ul");
-list.addEventListener(
-    "click",
-    function (ev) {
-        if (ev.target.tagName === "LI") {
-            ev.target.classList.toggle("checked");
-        }
-    },
-    false
-);
+    axios
+        .post("http://localhost:4080/api/add", itemToAdd)
+        .then((res) => {
+            console.log(res.data);
+            itemToRemove.innerHTML = `
+                <s class="spring-item" id="${itemToRemove.textContent}" onclick="addChecklist('${itemToRemove.textContent}')">${itemToRemove.textContent}</s>
+            `;
+        })
+        .catch((err) => {
+            console.log(err);
+            alert(err.response.data);
+        });
+};
+const addItem = () => {
+    const item = springInput.value;
 
-function newElement() {
-    var li = document.createElement("li");
-    var inputValue = document.getElementById("myInput").value;
-    var t = document.createTextNode(inputValue);
-    li.appendChild(t);
-    if (inputValue === "") {
-        alert("You must write something!");
-    } else {
-        document.getElementById("myUL").appendChild(li);
-    }
-    document.getElementById("myInput").value = "";
+    const itemToAdd = {
+        item: item,
+    };
+    axios
+        .post("http://localhost:4080/api/springadded", itemToAdd)
+        .then((res) => {
+            let springArr = res.data;
+            for (let i = 0; i < springArr.length; i++) {
+                const newItem = document.createElement("li");
+                newItem.innerHTML = `
+                    <li class="item" id="${springArr[i]}" onclick="addChecklist('${springArr[i]}')">${springArr[i]}</li>
+                `;
+            }
+        });
+};
+myButton.addEventListener("click", addItem);
 
-    var span = document.createElement("SPAN");
-    var txt = document.createTextNode("\u00D7");
-    span.className = "close";
-    span.appendChild(txt);
-    li.appendChild(span);
-
-    for (i = 0; i < close.length; i++) {
-        close[i].onclick = function () {
-            var div = this.parentElement;
-            div.style.display = "none";
-        };
-    }
-}
+getSpringList();
